@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var timerModel: TimerModel
+    @FocusState private var focusHours: Bool
     
     var body: some View {
         VStack(spacing: 20) {
@@ -35,6 +36,8 @@ struct ContentView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 50)
                                 .multilineTextAlignment(.center)
+                                .focused($focusHours)
+                                .submitLabel(.go)
                         }
                         
                         VStack {
@@ -45,6 +48,7 @@ struct ContentView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 50)
                                 .multilineTextAlignment(.center)
+                                .submitLabel(.go)
                         }
                         
                         VStack {
@@ -55,6 +59,7 @@ struct ContentView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 50)
                                 .multilineTextAlignment(.center)
+                                .submitLabel(.go)
                         }
                     }
                     
@@ -64,6 +69,7 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                         TextField("Timer ended", text: $timerModel.speechText)
                             .textFieldStyle(.roundedBorder)
+                            .submitLabel(.go)
                     }
                 }
             }
@@ -101,7 +107,11 @@ struct ContentView: View {
             .font(.caption)
             .foregroundColor(.secondary)
         }
+        .onSubmit {
+            timerModel.startTimer()
+        }
         .padding()
         .frame(width: 250)
+        .onAppear { focusHours = true }
     }
 }
