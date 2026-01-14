@@ -3,6 +3,7 @@ import Foundation
 import AudioToolbox
 import AVFoundation
 
+@MainActor
 class TimerModel: ObservableObject {
     @Published var hours: Int = 0
     @Published var minutes: Int = 0
@@ -38,16 +39,21 @@ class TimerModel: ObservableObject {
     func startTimer() {
         guard hours > 0 || minutes > 0 || seconds > 0 else { return }
         
+        timer?.invalidate()
+        timer = nil
+        
         totalSeconds = hours * 3600 + minutes * 60 + seconds
         remainingSeconds = totalSeconds
         isRunning = true
         persistSettings()
         
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            DispatchQueue.main.async {
-                self.tick()
+        let newTimer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.tick()
             }
         }
+        RunLoop.main.add(newTimer, forMode: .common)
+        timer = newTimer
     }
     
     func stopTimer() {

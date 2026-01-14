@@ -13,13 +13,6 @@ struct TimerApp: App {
             guard app.processIdentifier != getpid() else { return false }
             return app.bundleIdentifier == Bundle.main.bundleIdentifier && app.isFinishedLaunching
         }
-        if runningSameBundle {
-            // Exit quickly so `&` doesn't spawn multiple copies
-            DispatchQueue.main.async {
-                NSApp.terminate(nil)
-            }
-            return
-        }
 
         // Parse command line arguments for hours, minutes, seconds, message, and auto-start
         let args = CommandLine.arguments
@@ -126,6 +119,12 @@ struct TimerApp: App {
         // Flag for auto-start handoff to a running instance
         defaults.set(autoStart, forKey: "TimerModel.autoStart")
 
+        // If another instance is already running, hand off via defaults and exit
+        if runningSameBundle {
+            DispatchQueue.main.async { NSApp.terminate(nil) }
+            return
+        }
+
         let model = timerModel
 
         // Capture values to avoid capturing self in an escaping closure
@@ -175,6 +174,7 @@ struct TimerApp: App {
                 if timerModel.isRunning {
                     Text(timerModel.formattedTime)
                         .font(.system(.caption, design: .monospaced))
+                        .id(timerModel.formattedTime)
                 } else {
                     // Determine if we are at zero and should flash
                     let atZero = timerModel.formattedTime == "0:00:00" || timerModel.formattedTime == "0:0:0" || timerModel.formattedTime == "00:00:00"

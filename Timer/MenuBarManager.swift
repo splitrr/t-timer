@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 
+@MainActor
 class MenuBarManager: ObservableObject {
     private var statusItem: NSStatusItem?
     
