@@ -5,10 +5,21 @@ struct HotKey {
     let keyCode: UInt32     // kVK_...
     let modifiers: UInt32   // cmdKey, optionKey, controlKey, shiftKey
 
-    static let command: UInt32 = cmdKey
-    static let option: UInt32  = optionKey
-    static let control: UInt32 = controlKey
-    static let shift: UInt32   = shiftKey
+    static let command: UInt32 = UInt32(cmdKey)
+    static let option: UInt32  = UInt32(optionKey)
+    static let control: UInt32 = UInt32(controlKey)
+    static let shift: UInt32   = UInt32(shiftKey)
+    /// All four modifiers: command + option + control + shift
+    static let hyper: UInt32 = command | option | control | shift
+
+    /// Convenience for Command+Option+Control+Shift + Keypad '.'
+    static func keypadDot() -> HotKey {
+        return HotKey(keyCode: UInt32(kVK_ANSI_KeypadDecimal), modifiers: hyper)
+    }
+    /// Convenience for Command + ';'
+    static func commandSemicolon() -> HotKey {
+        return HotKey(keyCode: UInt32(kVK_ANSI_Semicolon), modifiers: command)
+    }
 }
 
 /// A simple global hotkey manager based on Carbon's RegisterEventHotKey.
@@ -63,3 +74,4 @@ final class HotKeyManager {
         handler = nil
     }
 }
+

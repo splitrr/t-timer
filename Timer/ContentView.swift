@@ -87,7 +87,6 @@ struct ContentView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
-                    .keyboardShortcut(.return, modifiers: [])
                     .disabled(timerModel.hours == 0 && timerModel.minutes == 0 && timerModel.seconds == 0)
                     
                     if timerModel.remainingSeconds > 0 {
@@ -115,3 +114,4 @@ struct ContentView: View {
         .onAppear { focusHours = true }
     }
 }
+
