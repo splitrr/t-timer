@@ -49,7 +49,7 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate {
     }
     
     private func setupHotKey() {
-        let hotKey = HotKey(keyCode: UInt32(kVK_ANSI_T), modifiers: HotKey.command | HotKey.option)
+        let hotKey = HotKey(keyCode: UInt32(kVK_F20), modifiers: 0)
         let registered = hotKeyManager.register(hotKey: hotKey) { [weak self] in
             Task { @MainActor in
                 self?.toggleTimerPanel()
@@ -63,8 +63,7 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate {
 
     private func registerFallbackKeyMonitor() {
         let handler: (NSEvent) -> Void = { [weak self] event in
-            let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            if modifiers.contains([.command, .option]), event.charactersIgnoringModifiers?.lowercased() == "t" {
+            if event.keyCode == UInt16(kVK_F20) {
                 Task { @MainActor in
                     self?.toggleTimerPanel()
                 }

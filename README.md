@@ -4,7 +4,7 @@
 T-Timer is a macOS menubar timer. It shows the countdown in the menubar, speaks a phrase on completion, and blinks the time text until dismissed.
 
 ## Hotkey
-- Toggle panel: Command + Option + T
+- Toggle panel: F20
 
 ## Build
 Debug build:
