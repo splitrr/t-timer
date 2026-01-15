@@ -4,7 +4,7 @@ import Carbon.HIToolbox
 import Combine
 
 @MainActor
-class TimerMenuBarApp: NSObject, NSApplicationDelegate {
+class TimerMenuBarApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var statusItem: NSStatusItem!
     private var timerModel = TimerModel()
     private var hotKeyManager = HotKeyManager()
@@ -83,6 +83,7 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate {
     @objc private func toggleTimerPanel() {
         if timerModel.didFinish {
             timerModel.didFinish = false
+            stopFlashing()
         }
         if let window = timerWindow, window.isVisible {
             window.orderOut(nil)
@@ -108,6 +109,7 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate {
             timerWindow?.level = .floating
             timerWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
             timerWindow?.isReleasedWhenClosed = false
+            timerWindow?.delegate = self
         }
 
         if let window = timerWindow, let button = statusItem.button {
@@ -128,6 +130,12 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate {
             window.makeKeyAndOrderFront(nil)
             timerModel.requestFocus()
         }
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow, window == timerWindow else { return }
+        timerWindow = nil
+        updateMenuBarAppearance()
     }
     
     private func updateMenuBarAppearance() {

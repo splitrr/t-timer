@@ -15,9 +15,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "72"
-            endingLineNumber = "72"
-            landmarkName = "init()"
-            landmarkType = "7">
+            endingLineNumber = "72">
             <Locations>
                <Location
                   uuid = "7BA23261-ACE8-40AE-B80A-16A56CE06F1F - 598557d7e491e6ce"
@@ -61,9 +59,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "75"
-            endingLineNumber = "75"
-            landmarkName = "init()"
-            landmarkType = "7">
+            endingLineNumber = "75">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
