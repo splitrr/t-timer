@@ -4,11 +4,11 @@ import Carbon.HIToolbox
 import Combine
 
 @MainActor
-class TimerMenuBarApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
+class TimerMenuBarApp: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var timerModel = TimerModel()
     private var hotKeyManager = HotKeyManager()
-    private var timerWindow: NSPanel?
+    private var timerPopover: NSPopover?
     private var flashTimer: Timer?
     private var isFlashing = false
     private var isFlashOn = false
@@ -51,7 +51,7 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func setupHotKey() {
         let hotKey = HotKey(keyCode: UInt32(kVK_ANSI_T), modifiers: HotKey.command | HotKey.option)
         let registered = hotKeyManager.register(hotKey: hotKey) { [weak self] in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self?.toggleTimerPanel()
             }
         }
@@ -65,7 +65,9 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let handler: (NSEvent) -> Void = { [weak self] event in
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             if modifiers.contains([.command, .option]), event.charactersIgnoringModifiers?.lowercased() == "t" {
-                self?.toggleTimerPanel()
+                Task { @MainActor in
+                    self?.toggleTimerPanel()
+                }
             }
         }
 
@@ -85,86 +87,31 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
             timerModel.didFinish = false
             stopFlashing()
         }
-        if let window = timerWindow, window.isVisible {
-            window.orderOut(nil)
+        if timerPopover?.isShown == true {
+            timerPopover?.performClose(nil)
         } else {
-            showTimerPanel()
+            showTimerPopover()
         }
     }
     
-    private func showTimerPanel() {
-        if timerWindow == nil {
+    private func showTimerPopover() {
+        guard let button = statusItem.button else { return }
+
+        if timerPopover == nil {
             let contentView = ContentView().environmentObject(timerModel)
-            let hostingView = NSHostingView(rootView: contentView)
+            let hostingController = NSHostingController(rootView: contentView)
 
-            let visualEffectView = NSVisualEffectView()
-            visualEffectView.material = .hudWindow
-            visualEffectView.state = .active
-            visualEffectView.blendingMode = .behindWindow
-            visualEffectView.alphaValue = 0.8
-
-            let tintView = NSView()
-            tintView.wantsLayer = true
-            tintView.layer?.backgroundColor = NSColor(calibratedRed: 0.22, green: 0.34, blue: 0.62, alpha: 0.35).cgColor
-            visualEffectView.addSubview(tintView)
-
-            visualEffectView.addSubview(hostingView, positioned: .above, relativeTo: tintView)
-            tintView.translatesAutoresizingMaskIntoConstraints = false
-            hostingView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                tintView.leadingAnchor.constraint(equalTo: visualEffectView.leadingAnchor),
-                tintView.trailingAnchor.constraint(equalTo: visualEffectView.trailingAnchor),
-                tintView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
-                tintView.bottomAnchor.constraint(equalTo: visualEffectView.bottomAnchor),
-                hostingView.leadingAnchor.constraint(equalTo: visualEffectView.leadingAnchor),
-                hostingView.trailingAnchor.constraint(equalTo: visualEffectView.trailingAnchor),
-                hostingView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
-                hostingView.bottomAnchor.constraint(equalTo: visualEffectView.bottomAnchor)
-            ])
-
-            timerWindow = NSPanel(
-                contentRect: NSRect(x: 0, y: 0, width: 280, height: 200),
-                styleMask: [.titled, .closable, .fullSizeContentView],
-                backing: .buffered,
-                defer: false
-            )
-
-            timerWindow?.contentView = visualEffectView
-            timerWindow?.title = "Timer"
-            timerWindow?.titleVisibility = .visible
-            timerWindow?.titlebarAppearsTransparent = true
-            timerWindow?.level = .floating
-            timerWindow?.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-            timerWindow?.isReleasedWhenClosed = false
-            timerWindow?.delegate = self
-            timerWindow?.isOpaque = false
-            timerWindow?.backgroundColor = .clear
+            let popover = NSPopover()
+            popover.contentViewController = hostingController
+            popover.behavior = .transient
+            popover.animates = true
+            popover.contentSize = NSSize(width: 280, height: 200)
+            timerPopover = popover
         }
 
-        if let window = timerWindow, let button = statusItem.button {
-            let windowSize = window.frame.size
-            let buttonFrame = button.window?.convertToScreen(button.frame) ?? NSScreen.main?.visibleFrame ?? .zero
-            let visibleFrame = button.window?.screen?.visibleFrame ?? NSScreen.main?.visibleFrame ?? .zero
-
-            var windowOrigin = NSPoint(
-                x: buttonFrame.midX - windowSize.width / 2,
-                y: buttonFrame.minY - windowSize.height - 10
-            )
-
-            windowOrigin.x = max(visibleFrame.minX, min(windowOrigin.x, visibleFrame.maxX - windowSize.width))
-            windowOrigin.y = max(visibleFrame.minY, min(windowOrigin.y, visibleFrame.maxY - windowSize.height))
-
-            window.setFrameOrigin(windowOrigin)
-            NSApp.activate(ignoringOtherApps: true)
-            window.makeKeyAndOrderFront(nil)
-            timerModel.requestFocus()
-        }
-    }
-
-    func windowWillClose(_ notification: Notification) {
-        guard let window = notification.object as? NSWindow, window == timerWindow else { return }
-        timerWindow = nil
-        updateMenuBarAppearance()
+        timerPopover?.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        NSApp.activate(ignoringOtherApps: true)
+        timerModel.requestFocus()
     }
     
     private func updateMenuBarAppearance() {
@@ -221,7 +168,6 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
         flashTimer?.invalidate()
         flashTimer = nil
         if let button = statusItem.button {
-            configureStatusButton(button)
             button.image = NSImage(systemSymbolName: "timer.circle", accessibilityDescription: "Timer")
             setButtonTitle(button, text: timerModel.formattedTime, visible: true)
         }
@@ -229,7 +175,6 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func toggleFlash() {
         guard let button = statusItem.button else { return }
-        configureStatusButton(button)
         isFlashOn.toggle()
         button.image = NSImage(systemSymbolName: "timer.circle", accessibilityDescription: "Timer")
         setButtonTitle(button, text: timerModel.formattedTime, visible: isFlashOn)

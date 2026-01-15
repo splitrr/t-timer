@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var timerModel: TimerModel
-    @FocusState private var focusHours: Bool
+    @FocusState private var focusMinutes: Bool
     
     var body: some View {
         VStack(spacing: 20) {
@@ -36,7 +36,6 @@ struct ContentView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 50)
                                 .multilineTextAlignment(.center)
-                                .focused($focusHours)
                                 .submitLabel(.go)
                         }
                         
@@ -48,6 +47,7 @@ struct ContentView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 50)
                                 .multilineTextAlignment(.center)
+                                .focused($focusMinutes)
                                 .submitLabel(.go)
                         }
                         
@@ -78,9 +78,11 @@ struct ContentView: View {
                 if timerModel.isRunning {
                     Button("Stop") {
                         timerModel.stopTimer()
+                        timerModel.requestFocus()
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
+                    .keyboardShortcut(.defaultAction)
                 } else {
                     Button("Start") {
                         timerModel.startTimer()
@@ -113,10 +115,17 @@ struct ContentView: View {
         .frame(width: 250)
         .onChange(of: timerModel.focusToken) { _ in
             if !timerModel.isRunning {
-                focusHours = true
+                focusMinutes = true
             }
         }
-        .onAppear { focusHours = true }
+        .onChange(of: timerModel.isRunning) { isRunning in
+            if !isRunning {
+                Task { @MainActor in
+                    focusMinutes = true
+                }
+            }
+        }
+        .onAppear { focusMinutes = true }
     }
 }
 
