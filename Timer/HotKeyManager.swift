@@ -32,7 +32,8 @@ final class HotKeyManager {
         unregister()
     }
 
-    func register(hotKey: HotKey, handler: @escaping () -> Void) {
+    @discardableResult
+    func register(hotKey: HotKey, handler: @escaping () -> Void) -> Bool {
         unregister()
 
         self.handler = handler
@@ -50,7 +51,7 @@ final class HotKeyManager {
         let userData = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         InstallEventHandler(GetEventDispatcherTarget(), callback, 1, &eventSpec, userData, &eventHandlerRef)
 
-        var hotKeyID = EventHotKeyID(signature: OSType(0x484B4D47), id: UInt32(1)) // 'HKMG'
+        let hotKeyID = EventHotKeyID(signature: OSType(0x484B4D47), id: UInt32(1)) // 'HKMG'
         let status = RegisterEventHotKey(hotKey.keyCode,
                                          hotKey.modifiers,
                                          hotKeyID,
@@ -59,7 +60,10 @@ final class HotKeyManager {
                                          &hotKeyRef)
         if status != noErr {
             NSLog("Failed to register hotkey: \(status)")
+            return false
         }
+
+        return true
     }
 
     func unregister() {

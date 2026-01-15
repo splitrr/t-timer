@@ -9,23 +9,21 @@
 /* Begin PBXBuildFile section */
 		28463D8C2F1797CD0085353F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 28463D8B2F1797CD0085353F /* Assets.xcassets */; };
 		2871332C2F180413008A7A5F /* HotKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2871332B2F180413008A7A5F /* HotKeyManager.swift */; };
-		28C8C6212F17E92200B85565 /* run-timer.sh in Resources */ = {isa = PBXBuildFile; fileRef = 28C8C6202F17E92200B85565 /* run-timer.sh */; };
 		28C8C6232F17EA1B00B85565 /* com.yourcompany.TimerApp.plist in Resources */ = {isa = PBXBuildFile; fileRef = 28C8C6222F17EA1B00B85565 /* com.yourcompany.TimerApp.plist */; };
 		2A123ABC00000001 /* TimerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000000 /* TimerApp.swift */; };
 		2A123ABC00000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000002 /* ContentView.swift */; };
-		2A123ABC00000005 /* MenuBarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000004 /* MenuBarManager.swift */; };
+		2A123ABC00000005 /* TimerAppNSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000004 /* TimerAppNSMenu.swift */; };
 		2A123ABC00000007 /* TimerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000006 /* TimerModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		28463D8B2F1797CD0085353F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2871332B2F180413008A7A5F /* HotKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyManager.swift; sourceTree = "<group>"; };
-		28C8C6202F17E92200B85565 /* run-timer.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "run-timer.sh"; sourceTree = "<group>"; };
 		28C8C6222F17EA1B00B85565 /* com.yourcompany.TimerApp.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = com.yourcompany.TimerApp.plist; sourceTree = "<group>"; };
 		2A123ABB00000000 /* T-Timer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "T-Timer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A123ABC00000000 /* TimerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerApp.swift; sourceTree = "<group>"; };
 		2A123ABC00000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		2A123ABC00000004 /* MenuBarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarManager.swift; sourceTree = "<group>"; };
+		2A123ABC00000004 /* TimerAppNSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerAppNSMenu.swift; sourceTree = "<group>"; };
 		2A123ABC00000006 /* TimerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -54,9 +52,8 @@
 			children = (
 				2A123ABC00000000 /* TimerApp.swift */,
 				2A123ABC00000002 /* ContentView.swift */,
-				2A123ABC00000004 /* MenuBarManager.swift */,
+				2A123ABC00000004 /* TimerAppNSMenu.swift */,
 				2A123ABC00000006 /* TimerModel.swift */,
-				28C8C6202F17E92200B85565 /* run-timer.sh */,
 				28C8C6222F17EA1B00B85565 /* com.yourcompany.TimerApp.plist */,
 				2871332B2F180413008A7A5F /* HotKeyManager.swift */,
 			);
@@ -124,7 +121,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				28C8C6212F17E92200B85565 /* run-timer.sh in Resources */,
 				28C8C6232F17EA1B00B85565 /* com.yourcompany.TimerApp.plist in Resources */,
 				28463D8C2F1797CD0085353F /* Assets.xcassets in Resources */,
 			);
@@ -139,7 +135,7 @@
 			files = (
 				2A123ABC00000001 /* TimerApp.swift in Sources */,
 				2A123ABC00000003 /* ContentView.swift in Sources */,
-				2A123ABC00000005 /* MenuBarManager.swift in Sources */,
+				2A123ABC00000005 /* TimerAppNSMenu.swift in Sources */,
 				2871332C2F180413008A7A5F /* HotKeyManager.swift in Sources */,
 				2A123ABC00000007 /* TimerModel.swift in Sources */,
 			);

@@ -12,6 +12,8 @@ class TimerModel: ObservableObject {
     @Published var remainingSeconds: Int = 0
     @Published var isRunning: Bool = false
     @Published var speechText: String = "Timer ended"
+    @Published var didFinish: Bool = false
+    @Published var focusToken = UUID()
     
     private let kHoursKey = "TimerModel.hours"
     private let kMinutesKey = "TimerModel.minutes"
@@ -35,6 +37,10 @@ class TimerModel: ObservableObject {
         defaults.set(seconds, forKey: kSecondsKey)
         defaults.set(speechText, forKey: kSpeechKey)
     }
+
+    func requestFocus() {
+        focusToken = UUID()
+    }
     
     func startTimer() {
         guard hours > 0 || minutes > 0 || seconds > 0 else { return }
@@ -45,6 +51,7 @@ class TimerModel: ObservableObject {
         totalSeconds = hours * 3600 + minutes * 60 + seconds
         remainingSeconds = totalSeconds
         isRunning = true
+        didFinish = false
         persistSettings()
         
         let newTimer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -56,26 +63,39 @@ class TimerModel: ObservableObject {
         timer = newTimer
     }
     
-    func stopTimer() {
+    func stopTimer(userInitiated: Bool = true) {
         timer?.invalidate()
         timer = nil
         isRunning = false
         remainingSeconds = 0
+        if userInitiated {
+            didFinish = false
+        }
     }
     
     func resetTimer() {
-        stopTimer()
+        stopTimer(userInitiated: true)
         remainingSeconds = 0
+        didFinish = false
         persistSettings()
     }
     
     private func tick() {
         if remainingSeconds > 0 {
             remainingSeconds -= 1
+            if remainingSeconds == 0 {
+                finishTimer()
+            }
         } else {
-            stopTimer()
-            speak(text: speechText)
+            finishTimer()
         }
+    }
+
+    private func finishTimer() {
+        guard !didFinish else { return }
+        stopTimer(userInitiated: false)
+        didFinish = true
+        speak(text: speechText)
     }
     
     private func playBeep() {

@@ -111,6 +111,11 @@ struct ContentView: View {
         }
         .padding()
         .frame(width: 250)
+        .onChange(of: timerModel.focusToken) { _ in
+            if !timerModel.isRunning {
+                focusHours = true
+            }
+        }
         .onAppear { focusHours = true }
     }
 }
