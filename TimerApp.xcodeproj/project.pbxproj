@@ -25,6 +25,14 @@
 		2A123ABC00000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2A123ABC00000004 /* TimerAppNSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerAppNSMenu.swift; sourceTree = "<group>"; };
 		2A123ABC00000006 /* TimerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerModel.swift; sourceTree = "<group>"; };
+		2A123ABC00000008 /* 00-project-brief.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "00-project-brief.md"; sourceTree = "<group>"; };
+		2A123ABC00000009 /* 01-scope-and-non-goals.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "01-scope-and-non-goals.md"; sourceTree = "<group>"; };
+		2A123ABC0000000A /* 02-architecture.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "02-architecture.md"; sourceTree = "<group>"; };
+		2A123ABC0000000B /* 03-data-and-assumptions.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "03-data-and-assumptions.md"; sourceTree = "<group>"; };
+		2A123ABC0000000C /* 04-decisions-log.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "04-decisions-log.md"; sourceTree = "<group>"; };
+		2A123ABC0000000D /* 05-open-questions.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "05-open-questions.md"; sourceTree = "<group>"; };
+		2A123ABC0000000E /* 06-Experiments.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "06-Experiments.md"; sourceTree = "<group>"; };
+		2A123ABC0000000F /* NOTIFICATIONS-DATA-ASSUMPTIONS.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "NOTIFICATIONS-DATA-ASSUMPTIONS.md"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +64,14 @@
 				2A123ABC00000006 /* TimerModel.swift */,
 				28C8C6222F17EA1B00B85565 /* com.yourcompany.TimerApp.plist */,
 				2871332B2F180413008A7A5F /* HotKeyManager.swift */,
+				2A123ABC00000008 /* 00-project-brief.md */,
+				2A123ABC00000009 /* 01-scope-and-non-goals.md */,
+				2A123ABC0000000A /* 02-architecture.md */,
+				2A123ABC0000000B /* 03-data-and-assumptions.md */,
+				2A123ABC0000000C /* 04-decisions-log.md */,
+				2A123ABC0000000D /* 05-open-questions.md */,
+				2A123ABC0000000E /* 06-Experiments.md */,
+				2A123ABC0000000F /* NOTIFICATIONS-DATA-ASSUMPTIONS.md */,
 			);
 			path = Timer;
 			sourceTree = "<group>";
