@@ -101,18 +101,44 @@ struct ContentView: View {
                 }
             }
             
-            Button("Quit") {
-                NSApplication.shared.terminate(nil)
+            HStack(spacing: 8) {
+                if #available(macOS 14.0, *) {
+                    SettingsLink {
+                        Label("Preferences", systemImage: "gearshape")
+                    }
+                    .labelStyle(.titleAndIcon)
+                    .buttonStyle(.plain)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                } else {
+                    Button {
+                        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+                    } label: {
+                        Label("Preferences", systemImage: "gearshape")
+                    }
+                    .labelStyle(.titleAndIcon)
+                    .buttonStyle(.plain)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                }
+
+                Text("|")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Button("Quit") {
+                    NSApplication.shared.terminate(nil)
+                }
+                .buttonStyle(.plain)
+                .font(.caption)
+                .foregroundColor(.secondary)
             }
-            .buttonStyle(.plain)
-            .font(.caption)
-            .foregroundColor(.secondary)
         }
         .onSubmit {
             timerModel.startTimer()
         }
         .padding()
-        .frame(width: 250)
+        .frame(width: 260)
         .onChange(of: timerModel.focusToken) { _ in
             if !timerModel.isRunning {
                 focusMinutes = true

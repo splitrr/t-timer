@@ -14,6 +14,8 @@
 		2A123ABC00000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000002 /* ContentView.swift */; };
 		2A123ABC00000005 /* TimerAppNSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000004 /* TimerAppNSMenu.swift */; };
 		2A123ABC00000007 /* TimerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000006 /* TimerModel.swift */; };
+		2A123ABC00000100 /* BackupNotificationMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000102 /* BackupNotificationMonitor.swift */; };
+		2A123ABC00000101 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A123ABC00000103 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +35,8 @@
 		2A123ABC0000000D /* 05-open-questions.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "05-open-questions.md"; sourceTree = "<group>"; };
 		2A123ABC0000000E /* 06-Experiments.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "06-Experiments.md"; sourceTree = "<group>"; };
 		2A123ABC0000000F /* NOTIFICATIONS-DATA-ASSUMPTIONS.md */ = {isa = PBXFileReference; lastKnownFileType = text.markdown; path = "NOTIFICATIONS-DATA-ASSUMPTIONS.md"; sourceTree = "<group>"; };
+		2A123ABC00000102 /* BackupNotificationMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupNotificationMonitor.swift; sourceTree = "<group>"; };
+		2A123ABC00000103 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +76,8 @@
 				2A123ABC0000000D /* 05-open-questions.md */,
 				2A123ABC0000000E /* 06-Experiments.md */,
 				2A123ABC0000000F /* NOTIFICATIONS-DATA-ASSUMPTIONS.md */,
+				2A123ABC00000102 /* BackupNotificationMonitor.swift */,
+				2A123ABC00000103 /* SettingsView.swift */,
 			);
 			path = Timer;
 			sourceTree = "<group>";
@@ -154,6 +160,8 @@
 				2A123ABC00000005 /* TimerAppNSMenu.swift in Sources */,
 				2871332C2F180413008A7A5F /* HotKeyManager.swift in Sources */,
 				2A123ABC00000007 /* TimerModel.swift in Sources */,
+				2A123ABC00000100 /* BackupNotificationMonitor.swift in Sources */,
+				2A123ABC00000101 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,13 +294,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = Timer/Timer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -314,13 +321,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = Timer/Timer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

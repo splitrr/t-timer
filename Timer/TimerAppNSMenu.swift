@@ -2,11 +2,13 @@ import SwiftUI
 import AppKit
 import Carbon.HIToolbox
 import Combine
+import UserNotifications
 
 @MainActor
-class TimerMenuBarApp: NSObject, NSApplicationDelegate {
+class TimerMenuBarApp: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+    private let notificationCenter = UNUserNotificationCenter.current()
     private var statusItem: NSStatusItem!
-    private var timerModel = TimerModel()
+    let timerModel = TimerModel()
     private var hotKeyManager = HotKeyManager()
     private var timerPopover: NSPopover?
     private var flashTimer: Timer?
@@ -17,8 +19,11 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate {
     private var localKeyMonitor: Any?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        setupNotifications()
         setupMenuBar()
         setupHotKey()
+        timerModel.backupMonitor.reapplyMarkerAccessFromSavedPath()
+        timerModel.backupMonitor.start()
     }
 
     deinit {
@@ -46,6 +51,36 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate {
                 self?.updateMenuBarAppearance()
             }
         }
+    }
+
+    private func setupNotifications() {
+        notificationCenter.delegate = self
+        notificationCenter.getNotificationSettings { settings in
+            NSLog("Notification settings: authorizationStatus=\(settings.authorizationStatus.rawValue)")
+        }
+        notificationCenter.getDeliveredNotifications { notifications in
+            guard notifications.isEmpty else { return }
+            Task { @MainActor in
+                self.sendTestNotification()
+            }
+        }
+    }
+
+    private func sendTestNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Timer"
+        content.body = "Notifications are enabled."
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: "timer-test", content: content, trigger: nil)
+        notificationCenter.add(request)
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .list, .sound])
     }
     
     private func setupHotKey() {
@@ -186,7 +221,8 @@ struct TimerApp: App {
     
     var body: some Scene {
         Settings {
-            EmptyView()
+            SettingsView()
+                .environmentObject(appDelegate.timerModel)
         }
     }
 }

@@ -3,8 +3,11 @@ import Foundation
 import AudioToolbox
 import AVFoundation
 
+
 @MainActor
 class TimerModel: ObservableObject {
+    let backupMonitor = BackupNotificationMonitor()
+
     @Published var hours: Int = 0
     @Published var minutes: Int = 0
     @Published var seconds: Int = 0
