@@ -104,7 +104,7 @@ struct ContentView: View {
             HStack(spacing: 8) {
                 if #available(macOS 14.0, *) {
                     SettingsLink {
-                        Label("Preferences", systemImage: "gearshape")
+                        Label("Backup notifications", systemImage: "gearshape")
                     }
                     .labelStyle(.titleAndIcon)
                     .buttonStyle(.plain)
@@ -114,7 +114,7 @@ struct ContentView: View {
                     Button {
                         NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
                     } label: {
-                        Label("Preferences", systemImage: "gearshape")
+                        Label("Backup notifications", systemImage: "gearshape")
                     }
                     .labelStyle(.titleAndIcon)
                     .buttonStyle(.plain)

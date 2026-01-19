@@ -118,6 +118,22 @@ final class BackupNotificationMonitor {
         appSupportMarkerURL.path
     }
 
+    func sendTestNotification() {
+        requestAuthorizationIfNeeded()
+        let content = UNMutableNotificationContent()
+        content.title = "Backup notifications"
+        content.body = "Test notification."
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: "backup-test", content: content, trigger: nil)
+        notificationCenter.removeDeliveredNotifications(withIdentifiers: ["backup-test"])
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: ["backup-test"])
+        notificationCenter.add(request) { error in
+            if let error = error {
+                NSLog("Failed to deliver test notification: \(error.localizedDescription)")
+            }
+        }
+    }
+
     private var notificationsEnabled: Bool {
         defaults.bool(forKey: BackupNotificationDefaults.notificationsEnabledKey)
     }
@@ -134,9 +150,9 @@ final class BackupNotificationMonitor {
         resolvedMarkerURL = nil
         timer?.invalidate()
         timer = nil
+        lastNotificationKey = nil
 
         guard notificationsEnabled else {
-            lastNotificationKey = nil
             clearMissingSince()
             return
         }
@@ -146,11 +162,12 @@ final class BackupNotificationMonitor {
             return
         }
 
-        let newTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(interval), repeats: true) { [weak self] _ in
+        let newTimer = Timer(timeInterval: TimeInterval(interval), repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.checkBackupStatus()
             }
         }
+        RunLoop.main.add(newTimer, forMode: .common)
         newTimer.tolerance = min(TimeInterval(interval) * 0.1, 30)
         timer = newTimer
 

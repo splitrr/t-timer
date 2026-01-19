@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UserNotifications
 
 struct SettingsView: View {
     @EnvironmentObject var timerModel: TimerModel
@@ -18,6 +19,7 @@ struct SettingsView: View {
     @State private var lastBackupText = ""
     @State private var lastBackupAgeText = ""
     @State private var lastBackupIsStale = false
+    @State private var notificationStatusText = ""
 
     private var isStaleSecondsValid: Bool {
         Int(staleSecondsText).map { $0 >= BackupNotificationDefaults.staleSecondsMin } ?? false
@@ -44,6 +46,29 @@ struct SettingsView: View {
             lastBackupIsStale = ageSeconds >= 7 * 24 * 60 * 60
         } else {
             lastBackupIsStale = true
+        }
+    }
+
+    private func refreshNotificationStatus() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            let statusText: String
+            switch settings.authorizationStatus {
+            case .authorized:
+                statusText = "Authorized"
+            case .denied:
+                statusText = "Denied"
+            case .provisional:
+                statusText = "Provisional"
+            case .ephemeral:
+                statusText = "Ephemeral"
+            case .notDetermined:
+                statusText = "Not determined"
+            @unknown default:
+                statusText = "Unknown"
+            }
+            DispatchQueue.main.async {
+                notificationStatusText = statusText
+            }
         }
     }
 
@@ -154,6 +179,22 @@ struct SettingsView: View {
                 }
             }
 
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Notification status")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(notificationStatusText.isEmpty ? "Checking..." : notificationStatusText)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+
+            Button("Send test notification") {
+                timerModel.backupMonitor.sendTestNotification()
+                refreshNotificationStatus()
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
             Spacer()
         }
         .padding(20)
@@ -163,6 +204,7 @@ struct SettingsView: View {
             pollIntervalText = String(pollIntervalSeconds)
             markerPathText = markerPath
             refreshLastBackupStatus()
+            refreshNotificationStatus()
         }
         .onChange(of: staleSeconds) { newValue in
             if Int(staleSecondsText) != newValue {

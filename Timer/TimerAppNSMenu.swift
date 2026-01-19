@@ -58,21 +58,6 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate, UNUserNotificationCenter
         notificationCenter.getNotificationSettings { settings in
             NSLog("Notification settings: authorizationStatus=\(settings.authorizationStatus.rawValue)")
         }
-        notificationCenter.getDeliveredNotifications { notifications in
-            guard notifications.isEmpty else { return }
-            Task { @MainActor in
-                self.sendTestNotification()
-            }
-        }
-    }
-
-    private func sendTestNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Timer"
-        content.body = "Notifications are enabled."
-        content.sound = .default
-        let request = UNNotificationRequest(identifier: "timer-test", content: content, trigger: nil)
-        notificationCenter.add(request)
     }
 
     func userNotificationCenter(
