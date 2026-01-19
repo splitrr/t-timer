@@ -51,14 +51,28 @@ struct SettingsView: View {
 
     private func refreshNotificationStatus() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
+            let alertEnabled = settings.alertSetting == .enabled
+            let centerEnabled = settings.notificationCenterSetting == .enabled
             let statusText: String
+            func withDelivery(_ base: String) -> String {
+                if alertEnabled && centerEnabled {
+                    return base
+                }
+                if alertEnabled {
+                    return "\(base) (alerts only)"
+                }
+                if centerEnabled {
+                    return "\(base) (center only)"
+                }
+                return "\(base) (alerts disabled)"
+            }
             switch settings.authorizationStatus {
             case .authorized:
-                statusText = "Authorized"
+                statusText = withDelivery("Authorized")
             case .denied:
                 statusText = "Denied"
             case .provisional:
-                statusText = "Provisional"
+                statusText = withDelivery("Provisional")
             case .ephemeral:
                 statusText = "Ephemeral"
             case .notDetermined:

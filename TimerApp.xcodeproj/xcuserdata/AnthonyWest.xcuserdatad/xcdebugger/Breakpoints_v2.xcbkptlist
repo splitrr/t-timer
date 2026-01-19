@@ -16,36 +16,6 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "72"
             endingLineNumber = "72">
-            <Locations>
-               <Location
-                  uuid = "7BA23261-ACE8-40AE-B80A-16A56CE06F1F - 598557d7e491e6ce"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "T_Timer.TimerApp.init() -&gt; T_Timer.TimerApp"
-                  moduleName = "T-Timer.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/AnthonyWest/repos/vibe-menuapp/Timer/TimerApp.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "72"
-                  endingLineNumber = "72">
-               </Location>
-               <Location
-                  uuid = "7BA23261-ACE8-40AE-B80A-16A56CE06F1F - 7a899e2cdac02afc"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 @Sendable (Foundation.Notification) -&gt; () in T_Timer.TimerApp.init() -&gt; T_Timer.TimerApp"
-                  moduleName = "T-Timer.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/AnthonyWest/repos/vibe-menuapp/Timer/TimerApp.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "73"
-                  endingLineNumber = "73">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -60,22 +30,6 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "75"
             endingLineNumber = "75">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "18D1C51E-7B8B-49C0-9CDD-A2BE5B4CDF86"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Timer/TimerAppNSMenu.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "19"
-            endingLineNumber = "19"
-            landmarkName = "TimerMenuBarApp"
-            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

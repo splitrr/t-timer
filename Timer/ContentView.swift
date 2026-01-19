@@ -3,6 +3,12 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var timerModel: TimerModel
     @FocusState private var focusMinutes: Bool
+
+    private func requestMinutesFocus() {
+        DispatchQueue.main.async {
+            focusMinutes = true
+        }
+    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -141,17 +147,17 @@ struct ContentView: View {
         .frame(width: 260)
         .onChange(of: timerModel.focusToken) { _ in
             if !timerModel.isRunning {
-                focusMinutes = true
+                requestMinutesFocus()
             }
         }
         .onChange(of: timerModel.isRunning) { isRunning in
             if !isRunning {
-                Task { @MainActor in
-                    focusMinutes = true
-                }
+                requestMinutesFocus()
             }
         }
-        .onAppear { focusMinutes = true }
+        .onAppear {
+            requestMinutesFocus()
+        }
     }
 }
 

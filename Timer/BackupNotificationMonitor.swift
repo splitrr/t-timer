@@ -119,7 +119,40 @@ final class BackupNotificationMonitor {
     }
 
     func sendTestNotification() {
-        requestAuthorizationIfNeeded()
+        notificationCenter.getNotificationSettings { [weak self] settings in
+            guard let self else { return }
+            if settings.authorizationStatus == .notDetermined {
+                Task { @MainActor in
+                    self.requestAuthorizationIfNeeded { granted in
+                        guard granted else { return }
+                        self.notificationCenter.getNotificationSettings { updatedSettings in
+                            Task { @MainActor in
+                                self.deliverTestNotificationIfAllowed(settings: updatedSettings)
+                            }
+                        }
+                    }
+                }
+                return
+            }
+            Task { @MainActor in
+                self.deliverTestNotificationIfAllowed(settings: settings)
+            }
+        }
+    }
+
+    private func deliverTestNotificationIfAllowed(settings: UNNotificationSettings) {
+        guard isAuthorized(settings.authorizationStatus) else {
+            NSLog("Notification authorization not granted.")
+            return
+        }
+        guard settings.alertSetting == .enabled || settings.notificationCenterSetting == .enabled else {
+            NSLog("Notification alerts are disabled in System Settings.")
+            return
+        }
+        scheduleTestNotification()
+    }
+
+    private func scheduleTestNotification() {
         let content = UNMutableNotificationContent()
         content.title = "Backup notifications"
         content.body = "Test notification."
@@ -131,6 +164,17 @@ final class BackupNotificationMonitor {
             if let error = error {
                 NSLog("Failed to deliver test notification: \(error.localizedDescription)")
             }
+        }
+    }
+
+    private func isAuthorized(_ status: UNAuthorizationStatus) -> Bool {
+        switch status {
+        case .authorized, .provisional, .ephemeral:
+            return true
+        case .denied, .notDetermined:
+            return false
+        @unknown default:
+            return false
         }
     }
 
@@ -150,9 +194,9 @@ final class BackupNotificationMonitor {
         resolvedMarkerURL = nil
         timer?.invalidate()
         timer = nil
-        lastNotificationKey = nil
 
         guard notificationsEnabled else {
+            lastNotificationKey = nil
             clearMissingSince()
             return
         }
@@ -206,7 +250,6 @@ final class BackupNotificationMonitor {
             sendNotificationIfNeeded(lastSuccess: lastSuccessText, key: notificationKey, ageText: ageText)
         } else {
             NSLog("Backup OK, no notification")
-            lastNotificationKey = nil
         }
     }
 
@@ -247,12 +290,17 @@ final class BackupNotificationMonitor {
     }
 
     private func clearMissingSince() {
-        defaults.removeObject(forKey: BackupNotificationDefaults.missingSinceKey)
+        let recorded = defaults.double(forKey: BackupNotificationDefaults.missingSinceKey)
+        guard recorded != 0 else { return }
+        defaults.set(0, forKey: BackupNotificationDefaults.missingSinceKey)
     }
 
     private func sendNotificationIfNeeded(lastSuccess: String, key: String, ageText: String?) {
         let notificationKey = "stale:\(key)"
-        guard lastNotificationKey != notificationKey else { return }
+        guard lastNotificationKey != notificationKey else {
+            NSLog("Skipping duplicate backup stale notification: \(notificationKey)")
+            return
+        }
         lastNotificationKey = notificationKey
 
         let content = UNMutableNotificationContent()
@@ -270,13 +318,14 @@ final class BackupNotificationMonitor {
         }
     }
 
-    private func requestAuthorizationIfNeeded() {
-        notificationCenter.requestAuthorization(options: [.alert]) { granted, error in
+    private func requestAuthorizationIfNeeded(completion: ((Bool) -> Void)? = nil) {
+        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if let error = error {
                 NSLog("Notification authorization error: \(error.localizedDescription)")
             } else if !granted {
                 NSLog("Notification authorization not granted.")
             }
+            completion?(granted)
         }
     }
 
@@ -323,3 +372,4 @@ final class BackupNotificationMonitor {
         }
     }
 }
+

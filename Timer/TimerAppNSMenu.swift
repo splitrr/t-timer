@@ -5,7 +5,7 @@ import Combine
 import UserNotifications
 
 @MainActor
-class TimerMenuBarApp: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+class TimerMenuBarApp: NSObject, NSApplicationDelegate, @MainActor UNUserNotificationCenterDelegate {
     private let notificationCenter = UNUserNotificationCenter.current()
     private var statusItem: NSStatusItem!
     let timerModel = TimerModel()
