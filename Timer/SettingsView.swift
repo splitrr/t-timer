@@ -20,6 +20,8 @@ struct SettingsView: View {
     @State private var lastBackupAgeText = ""
     @State private var lastBackupIsStale = false
     @State private var notificationStatusText = ""
+    @State private var diagnostics = BackupNotificationDiagnostics.empty
+    @State private var diagnosticsExpanded = true
 
     private var isStaleSecondsValid: Bool {
         Int(staleSecondsText).map { $0 >= BackupNotificationDefaults.staleSecondsMin } ?? false
@@ -83,6 +85,15 @@ struct SettingsView: View {
             DispatchQueue.main.async {
                 notificationStatusText = statusText
             }
+        }
+    }
+
+    private func diagnosticRow(label: String, value: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text(label)
+                .frame(width: 120, alignment: .leading)
+            Text(value.isEmpty ? "n/a" : value)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -209,16 +220,75 @@ struct SettingsView: View {
             .buttonStyle(.bordered)
             .controlSize(.small)
 
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Text("Diagnostics")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Button(diagnosticsExpanded ? "Hide" : "Show") {
+                        diagnosticsExpanded.toggle()
+                    }
+                    .buttonStyle(.link)
+                    .font(.caption)
+                }
+
+                if diagnosticsExpanded {
+                    VStack(alignment: .leading, spacing: 6) {
+                        diagnosticRow(label: "Last check", value: diagnostics.lastCheckTime)
+                        diagnosticRow(label: "Notifications", value: diagnostics.notificationsEnabled)
+                        diagnosticRow(label: "Stale threshold", value: diagnostics.staleThreshold)
+                        diagnosticRow(label: "Poll interval", value: diagnostics.pollInterval)
+                        diagnosticRow(label: "Marker path", value: diagnostics.resolvedMarkerPath)
+                        diagnosticRow(label: "Marker source", value: diagnostics.markerStatus)
+                        diagnosticRow(label: "Marker text", value: diagnostics.markerText)
+                        diagnosticRow(label: "Marker date", value: diagnostics.markerDate)
+                        diagnosticRow(label: "Marker age (s)", value: diagnostics.markerAgeSeconds)
+                        diagnosticRow(label: "Marker age", value: diagnostics.markerAgeText)
+                        diagnosticRow(label: "Decision", value: diagnostics.staleDecision)
+                        diagnosticRow(label: "Missing since", value: diagnostics.missingSince)
+                        diagnosticRow(label: "Last notif key", value: diagnostics.lastNotificationKey)
+                        diagnosticRow(label: "Last notif attempt", value: diagnostics.lastNotificationAttempt)
+                        diagnosticRow(label: "Last notif error", value: diagnostics.lastNotificationError)
+                    }
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .textSelection(.enabled)
+
+                    HStack(spacing: 10) {
+                        Button("Force check now") {
+                            timerModel.backupMonitor.runDiagnosticsCheck()
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+
+                        Button("Refresh view") {
+                            diagnostics = timerModel.backupMonitor.diagnostics
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                }
+            }
+
             Spacer()
         }
         .padding(20)
-        .frame(width: 340)
+        .frame(width: 360)
         .onAppear {
             staleSecondsText = String(staleSeconds)
             pollIntervalText = String(pollIntervalSeconds)
             markerPathText = markerPath
             refreshLastBackupStatus()
             refreshNotificationStatus()
+            diagnostics = timerModel.backupMonitor.diagnostics
+            timerModel.backupMonitor.onDiagnosticsUpdate = { updated in
+                DispatchQueue.main.async {
+                    diagnostics = updated
+                }
+            }
         }
         .onChange(of: staleSeconds) { newValue in
             if Int(staleSecondsText) != newValue {

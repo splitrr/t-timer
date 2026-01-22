@@ -7,6 +7,9 @@ import UserNotifications
 @MainActor
 class TimerMenuBarApp: NSObject, NSApplicationDelegate, @MainActor UNUserNotificationCenterDelegate {
     private let notificationCenter = UNUserNotificationCenter.current()
+    private static let openPreferencesNotification = Notification.Name("TimerApp.OpenPreferences")
+    private static let openPreferencesNotificationName = "TimerApp.OpenPreferences"
+    private var openPreferencesObserver: NSObjectProtocol?
     private var statusItem: NSStatusItem!
     let timerModel = TimerModel()
     private var hotKeyManager = HotKeyManager()
@@ -19,6 +22,11 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate, @MainActor UNUserNotific
     private var localKeyMonitor: Any?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if handleSecondaryInstanceIfNeeded() {
+            NSApp.terminate(nil)
+            return
+        }
+        setupPreferencesObserver()
         setupNotifications()
         setupMenuBar()
         setupHotKey()
@@ -33,6 +41,36 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate, @MainActor UNUserNotific
         if let monitor = localKeyMonitor {
             NSEvent.removeMonitor(monitor)
         }
+        if let observer = openPreferencesObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    private func setupPreferencesObserver() {
+        openPreferencesObserver = DistributedNotificationCenter.default().addObserver(
+            forName: Notification.Name(Self.openPreferencesNotificationName),
+            object: nil,
+            queue: .main
+        ) { _ in
+            NSApp.activate(ignoringOtherApps: true)
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+        }
+    }
+
+    private func handleSecondaryInstanceIfNeeded() -> Bool {
+        let runningApps = NSWorkspace.shared.runningApplications
+        let bundleId = Bundle.main.bundleIdentifier
+        let matches = runningApps.filter { app in
+            if let bundleId {
+                return app.bundleIdentifier == bundleId
+            }
+            return false
+        }
+        if matches.count <= 1 {
+            return false
+        }
+        DistributedNotificationCenter.default().post(name: Notification.Name(Self.openPreferencesNotificationName), object: nil)
+        return true
     }
     
     private func setupMenuBar() {
@@ -66,6 +104,22 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate, @MainActor UNUserNotific
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         completionHandler([.banner, .list, .sound])
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let identifier = response.notification.request.identifier
+        if identifier.hasPrefix("backup-") {
+            NSLog("Backup notifications: notification clicked (\(identifier))")
+            NSApp.activate(ignoringOtherApps: true)
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+            completionHandler()
+            return
+        }
+        completionHandler()
     }
     
     private func setupHotKey() {
