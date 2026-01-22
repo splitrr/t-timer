@@ -459,22 +459,6 @@ final class BackupNotificationMonitor {
 
     private func sendNotificationIfNeeded(lastSuccess: String, key: String, ageText: String?) {
         let notificationKey = "stale:\(key)"
-        guard lastNotificationKey != notificationKey else {
-            NSLog("Backup notifications: skipping duplicate notification \(notificationKey)")
-            lastNotificationAttempt = "skipped duplicate"
-            updateDiagnostics(
-                status: lastMarkerSource,
-                marker: lastCheckMarker,
-                resolvedURL: lastCheckResolvedURL,
-                staleDecision: lastCheckStaleDecision,
-                ageSeconds: lastCheckAgeSeconds,
-                ageText: lastCheckAgeText,
-                missingSince: lastCheckMissingSince,
-                notificationAttempt: lastNotificationAttempt,
-                notificationError: lastNotificationError
-            )
-            return
-        }
         lastNotificationKey = notificationKey
         lastNotificationAttempt = "scheduled"
         lastNotificationError = "n/a"
