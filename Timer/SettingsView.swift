@@ -13,8 +13,8 @@ struct SettingsView: View {
     @AppStorage(BackupNotificationDefaults.markerPathKey)
     private var markerPath = BackupNotificationDefaults.markerRelativePathDefault
 
-    @State private var staleSecondsText = ""
-    @State private var pollIntervalText = ""
+    @State private var staleHoursText = ""
+    @State private var pollIntervalHoursText = ""
     @State private var markerPathText = ""
     @State private var lastBackupText = ""
     @State private var lastBackupAgeText = ""
@@ -23,20 +23,63 @@ struct SettingsView: View {
     @State private var diagnostics = BackupNotificationDiagnostics.empty
     @State private var diagnosticsExpanded = true
 
-    private var isStaleSecondsValid: Bool {
-        Int(staleSecondsText).map { $0 >= BackupNotificationDefaults.staleSecondsMin } ?? false
+    private let secondsPerHour = 3600.0
+
+    private var isStaleHoursValid: Bool {
+        secondsFromHoursText(staleHoursText).map { $0 >= BackupNotificationDefaults.staleSecondsMin } ?? false
     }
 
     private var isPollIntervalValid: Bool {
-        Int(pollIntervalText).map { $0 >= BackupNotificationDefaults.pollIntervalMinSeconds } ?? false
+        secondsFromHoursText(pollIntervalHoursText).map { $0 >= BackupNotificationDefaults.pollIntervalMinSeconds } ?? false
     }
 
-    private var staleSecondsHelperText: String {
-        isStaleSecondsValid ? "" : "Enter a value of at least 1 second"
+    private var staleHoursHelperText: String {
+        isStaleHoursValid ? "" : "Enter a value greater than 0 hours"
     }
 
     private var pollIntervalHelperText: String {
-        isPollIntervalValid ? "" : "Enter a value of at least 1 second"
+        isPollIntervalValid ? "" : "Enter a value greater than 0 hours"
+    }
+
+    private func filteredHoursInput(_ text: String) -> String {
+        var output = ""
+        var hasDecimal = false
+        for character in text {
+            if character.isNumber {
+                output.append(character)
+            } else if character == ".", !hasDecimal {
+                hasDecimal = true
+                output.append(character)
+            }
+        }
+        return output
+    }
+
+    private func trimmedHoursText(_ hours: Double) -> String {
+        let format = hours < 1 ? "%.4f" : "%.2f"
+        var text = String(format: format, hours)
+        while text.contains(".") && (text.last == "0" || text.last == ".") {
+            if text.last == "." {
+                text.removeLast()
+                break
+            }
+            text.removeLast()
+        }
+        return text
+    }
+
+    private func hoursText(fromSeconds seconds: Int) -> String {
+        trimmedHoursText(Double(seconds) / secondsPerHour)
+    }
+
+    private func hoursText(fromSecondsText text: String) -> String {
+        guard let seconds = Double(text) else { return text }
+        return "\(trimmedHoursText(seconds / secondsPerHour)) h"
+    }
+
+    private func secondsFromHoursText(_ text: String) -> Int? {
+        guard let hours = Double(text) else { return nil }
+        return Int((hours * secondsPerHour).rounded())
     }
 
     private func refreshLastBackupStatus() {
@@ -102,49 +145,49 @@ struct SettingsView: View {
             Toggle("Backup notifications", isOn: $notificationsEnabled)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Warn if no backup for (seconds)")
+                Text("Warn if no backup for (hours)")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                TextField("\(BackupNotificationDefaults.staleSecondsDefault)", text: $staleSecondsText)
+                TextField(hoursText(fromSeconds: BackupNotificationDefaults.staleSecondsDefault), text: $staleHoursText)
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 160)
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(isStaleSecondsValid ? Color.clear : Color.red, lineWidth: 1)
+                            .stroke(isStaleHoursValid ? Color.clear : Color.red, lineWidth: 1)
                     )
-                    .onChange(of: staleSecondsText) { newValue in
-                        let filtered = newValue.filter { $0.isNumber }
+                    .onChange(of: staleHoursText) { newValue in
+                        let filtered = filteredHoursInput(newValue)
                         if filtered != newValue {
-                            staleSecondsText = filtered
+                            staleHoursText = filtered
                         }
-                        if let value = Int(filtered), value >= BackupNotificationDefaults.staleSecondsMin {
+                        if let value = secondsFromHoursText(filtered), value >= BackupNotificationDefaults.staleSecondsMin {
                             staleSeconds = value
                         }
                     }
-                if !staleSecondsHelperText.isEmpty {
-                    Text(staleSecondsHelperText)
+                if !staleHoursHelperText.isEmpty {
+                    Text(staleHoursHelperText)
                         .font(.caption2)
                         .foregroundColor(.red)
                 }
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Check every (seconds)")
+                Text("Check every (hours)")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                TextField("\(BackupNotificationDefaults.pollIntervalSecondsDefault)", text: $pollIntervalText)
+                TextField(hoursText(fromSeconds: BackupNotificationDefaults.pollIntervalSecondsDefault), text: $pollIntervalHoursText)
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 160)
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
                             .stroke(isPollIntervalValid ? Color.clear : Color.red, lineWidth: 1)
                     )
-                    .onChange(of: pollIntervalText) { newValue in
-                        let filtered = newValue.filter { $0.isNumber }
+                    .onChange(of: pollIntervalHoursText) { newValue in
+                        let filtered = filteredHoursInput(newValue)
                         if filtered != newValue {
-                            pollIntervalText = filtered
+                            pollIntervalHoursText = filtered
                         }
-                        if let value = Int(filtered), value >= BackupNotificationDefaults.pollIntervalMinSeconds {
+                        if let value = secondsFromHoursText(filtered), value >= BackupNotificationDefaults.pollIntervalMinSeconds {
                             pollIntervalSeconds = value
                         }
                     }
@@ -239,8 +282,8 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         diagnosticRow(label: "Last check", value: diagnostics.lastCheckTime)
                         diagnosticRow(label: "Notifications", value: diagnostics.notificationsEnabled)
-                        diagnosticRow(label: "Stale threshold", value: diagnostics.staleThreshold)
-                        diagnosticRow(label: "Poll interval", value: diagnostics.pollInterval)
+                        diagnosticRow(label: "Stale threshold", value: hoursText(fromSecondsText: diagnostics.staleThreshold))
+                        diagnosticRow(label: "Poll interval", value: hoursText(fromSecondsText: diagnostics.pollInterval))
                         diagnosticRow(label: "Marker path", value: diagnostics.resolvedMarkerPath)
                         diagnosticRow(label: "Marker source", value: diagnostics.markerStatus)
                         diagnosticRow(label: "Marker text", value: diagnostics.markerText)
@@ -278,8 +321,8 @@ struct SettingsView: View {
         .padding(20)
         .frame(width: 360)
         .onAppear {
-            staleSecondsText = String(staleSeconds)
-            pollIntervalText = String(pollIntervalSeconds)
+            staleHoursText = hoursText(fromSeconds: staleSeconds)
+            pollIntervalHoursText = hoursText(fromSeconds: pollIntervalSeconds)
             markerPathText = markerPath
             refreshLastBackupStatus()
             refreshNotificationStatus()
@@ -291,13 +334,13 @@ struct SettingsView: View {
             }
         }
         .onChange(of: staleSeconds) { newValue in
-            if Int(staleSecondsText) != newValue {
-                staleSecondsText = String(newValue)
+            if (secondsFromHoursText(staleHoursText) ?? newValue) != newValue {
+                staleHoursText = hoursText(fromSeconds: newValue)
             }
         }
         .onChange(of: pollIntervalSeconds) { newValue in
-            if Int(pollIntervalText) != newValue {
-                pollIntervalText = String(newValue)
+            if (secondsFromHoursText(pollIntervalHoursText) ?? newValue) != newValue {
+                pollIntervalHoursText = hoursText(fromSeconds: newValue)
             }
         }
         .onChange(of: markerPath) { newValue in
