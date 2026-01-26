@@ -2,11 +2,13 @@ import SwiftUI
 import AppKit
 import Carbon.HIToolbox
 import Combine
+import UserNotifications
 
 @MainActor
-class TimerMenuBarApp: NSObject, NSApplicationDelegate {
+class TimerMenuBarApp: NSObject, NSApplicationDelegate, @MainActor UNUserNotificationCenterDelegate {
+    private let notificationCenter = UNUserNotificationCenter.current()
     private var statusItem: NSStatusItem!
-    private var timerModel = TimerModel()
+    let timerModel = TimerModel()
     private var hotKeyManager = HotKeyManager()
     private var timerPopover: NSPopover?
     private var flashTimer: Timer?
@@ -17,8 +19,11 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate {
     private var localKeyMonitor: Any?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        setupNotifications()
         setupMenuBar()
         setupHotKey()
+        timerModel.backupMonitor.reapplyMarkerAccessFromSavedPath()
+        timerModel.backupMonitor.start()
     }
 
     deinit {
@@ -46,6 +51,37 @@ class TimerMenuBarApp: NSObject, NSApplicationDelegate {
                 self?.updateMenuBarAppearance()
             }
         }
+    }
+
+    private func setupNotifications() {
+        notificationCenter.delegate = self
+        notificationCenter.getNotificationSettings { settings in
+            NSLog("Notification settings: authorizationStatus=\(settings.authorizationStatus.rawValue)")
+        }
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .list, .sound])
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let identifier = response.notification.request.identifier
+        if identifier.hasPrefix("backup-") {
+            NSLog("Backup notifications: notification clicked (\(identifier))")
+            NSApp.activate(ignoringOtherApps: true)
+            NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+            completionHandler()
+            return
+        }
+        completionHandler()
     }
     
     private func setupHotKey() {
@@ -186,7 +222,8 @@ struct TimerApp: App {
     
     var body: some Scene {
         Settings {
-            EmptyView()
+            SettingsView()
+                .environmentObject(appDelegate.timerModel)
         }
     }
 }

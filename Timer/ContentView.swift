@@ -3,6 +3,12 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var timerModel: TimerModel
     @FocusState private var focusMinutes: Bool
+
+    private func requestMinutesFocus() {
+        DispatchQueue.main.async {
+            focusMinutes = true
+        }
+    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -101,31 +107,57 @@ struct ContentView: View {
                 }
             }
             
-            Button("Quit") {
-                NSApplication.shared.terminate(nil)
+            HStack(spacing: 8) {
+                if #available(macOS 14.0, *) {
+                    SettingsLink {
+                        Label("Backup notifications", systemImage: "gearshape")
+                    }
+                    .labelStyle(.titleAndIcon)
+                    .buttonStyle(.plain)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                } else {
+                    Button {
+                        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+                    } label: {
+                        Label("Backup notifications", systemImage: "gearshape")
+                    }
+                    .labelStyle(.titleAndIcon)
+                    .buttonStyle(.plain)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                }
+
+                Text("|")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Button("Quit") {
+                    NSApplication.shared.terminate(nil)
+                }
+                .buttonStyle(.plain)
+                .font(.caption)
+                .foregroundColor(.secondary)
             }
-            .buttonStyle(.plain)
-            .font(.caption)
-            .foregroundColor(.secondary)
         }
         .onSubmit {
             timerModel.startTimer()
         }
         .padding()
-        .frame(width: 250)
+        .frame(width: 260)
         .onChange(of: timerModel.focusToken) { _ in
             if !timerModel.isRunning {
-                focusMinutes = true
+                requestMinutesFocus()
             }
         }
         .onChange(of: timerModel.isRunning) { isRunning in
             if !isRunning {
-                Task { @MainActor in
-                    focusMinutes = true
-                }
+                requestMinutesFocus()
             }
         }
-        .onAppear { focusMinutes = true }
+        .onAppear {
+            requestMinutesFocus()
+        }
     }
 }
 
